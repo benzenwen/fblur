@@ -68,7 +68,9 @@ var Storage = function () {
 				callback( compositeResult );
 			};
 			request.onerror = function ( event ) {
-				callback( compositeResult );
+                if (compositeResult) {
+				  callback( compositeResult );
+                }               // Hmm, I guess we rely on the timeout b/c no callback if starting from scratch.
 			};
 
 		},

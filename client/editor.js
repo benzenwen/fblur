@@ -32,8 +32,6 @@ function initEditor() {
 // from three.js editor.html
 
 function initEditorReally() {
-
-  
   window.URL = window.URL || window.webkitURL;
   window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
 
@@ -71,53 +69,34 @@ function initEditorReally() {
   editor.setTheme( editor.config.getKey( 'theme' ) );
 
   editor.storage.init( function () {
-
-    editor.storage.get( function ( state ) {
-
-      if ( state !== undefined ) {
-
-	editor.fromJSON( state );
-
-      }
-
-      var selected = editor.config.getKey( 'selected' );
-
-      if ( selected !== undefined ) {
-
-	editor.selectByUuid( selected );
-
-      }
-
-    } );
+    Tracker.autorun( function (c) {
+      editor.storage.get( function ( state ) {
+        if ( state !== undefined ) {
+	      editor.fromJSON( state );
+        }
+        if (c.firstRun) {
+          var selected = editor.config.getKey( 'selected' );
+          if ( selected !== undefined ) {
+	        editor.selectByUuid( selected );
+          }
+        }
+      })
+    });
 
     //
-
     var timeout;
-
     var saveState = function ( scene ) {
-
       if ( editor.config.getKey( 'autosave' ) === false ) {
-
-	return;
-
+	    return;
       }
-
       clearTimeout( timeout );
-
       timeout = setTimeout( function () {
-
-	editor.signals.savingStarted.dispatch();
-
-	timeout = setTimeout( function () {
-
-	  editor.storage.set( editor.toJSON() );
-
-	  editor.signals.savingFinished.dispatch();
-
-	}, 100 );
-
+	    editor.signals.savingStarted.dispatch();
+	    timeout = setTimeout( function () {
+	      editor.storage.set( editor.toJSON() );
+	      editor.signals.savingFinished.dispatch();
+	    }, 100 );
       }, 1000 );
-
     };
 
     var signals = editor.signals;
@@ -132,74 +111,49 @@ function initEditorReally() {
     signals.scriptChanged.add( saveState );
 
     /*
-      var showDialog = function ( content ) {
-
+    var showDialog = function ( content ) {
       dialog.clear();
-
       dialog.add( content );
       dialog.showModal();
-
-      };
-
-      signals.showDialog.add( showDialog );
+    };
+    signals.showDialog.add( showDialog );
     */
-
-  } );
+  });
 
   //
-
   document.addEventListener( 'dragover', function ( event ) {
-
     event.preventDefault();
     event.dataTransfer.dropEffect = 'copy';
-
   }, false );
 
   document.addEventListener( 'drop', function ( event ) {
-
     event.preventDefault();
-
     if ( event.dataTransfer.files.length > 0 ) {
-
       editor.loader.loadFile( event.dataTransfer.files[ 0 ] );
-
     }
-
   }, false );
 
   document.addEventListener( 'keydown', function ( event ) {
-
     switch ( event.keyCode ) {
-
     case 8:
       event.preventDefault(); // prevent browser back
-
       var object = editor.selected;
-
       if ( confirm( 'Delete ' + object.name + '?' ) === false ) return;
-
       var parent = object.parent;
       editor.removeObject( object );
       editor.select( parent );
-
       break;
-
     }
-
   }, false );
 
   var onWindowResize = function ( event ) {
-
     editor.signals.windowResize.dispatch();
-
   };
 
   window.addEventListener( 'resize', onWindowResize, false );
-
   onWindowResize();
 
   //
-
   var file = null;
   var hash = window.location.hash;
 
@@ -207,29 +161,19 @@ function initEditorReally() {
   if ( hash.substr( 1, 6 ) === 'scene=' ) file = hash.substr( 7 );
 
   if ( file !== null ) {
-
     if ( confirm( 'Any unsaved data will be lost. Are you sure?' ) ) {
-
       var loader = new THREE.XHRLoader();
       loader.crossOrigin = '';
       loader.load( file, function ( text ) {
-
-	var json = JSON.parse( text );
-
-	editor.clear();
-	editor.fromJSON( json );
-
+	    var json = JSON.parse( text );
+	    editor.clear();
+	    editor.fromJSON( json );
       } );
-
     }
-
   }
 
   window.addEventListener( 'message', function ( event ) {
-
     editor.clear();
     editor.fromJSON( event.data );
-
   }, false );
-
 }
