@@ -1,66 +1,215 @@
 if (Meteor.isClient) {
-  scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.25, 1000 );
-  renderer = new THREE.WebGLRenderer();
-  renderer.setSize( window.innerWidth, window.innerHeight );
-
-  // Set camera distance
-  camera.position.z = 5;
-
-  cubes = [];
-
-  Meteor.startup(function () {
-    document.body.appendChild( renderer.domElement );
-
-    Tracker.autorun(function () {
-      cubes = [];
-      Cubes.find().forEach(function (cubeDoc) {
-        var geo = new THREE.BoxGeometry(cubeDoc.geometry[0], cubeDoc.geometry[1], cubeDoc.geometry[2]);
-        var material = new THREE.MeshBasicMaterial(cubeDoc.meshOptions);
-        var cube = new THREE.Mesh(geo, material);
-        // Add to scene
-        scene.add(cube);
-        // Save to cubes
-        cubes.push(cube);
-      });
-    });
-
-    render();
+  // Wait for all scripts
+  document.addEventListener("DOMContentLoaded", function(event) {
+    console.log("DOM fully loaded and parsed");
+    initEditor();
   });
 
-  render = function () {
-      requestAnimationFrame( render );
-      cubes.forEach(function (cube) {
-        cube.rotation.x += Math.random()*0.1;
-        cube.rotation.y += Math.random()*0.1;
-      });
-
-      renderer.render(scene, camera);
-  };
-
-
-  // goCube = function () {
-  //     geometry = new THREE.BoxGeometry( 1, 1, 1 );
-  //     material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
-  //     cube = new THREE.Mesh( geometry, material );
-  //     scene.add( cube );
-  // };
 }
 
 // Add seed data
 Meteor.startup(function () {
-  // if (Cubes.find().count() < 3) {
-  //   Cubes.insert({
-  //     geometry: [1,1,1],
-  //     meshOptions: { color: 0xffffff }
-  //   });
-  //   Cubes.insert({
-  //     geometry: [1,1,1],
-  //     meshOptions: { color: 0xcccccc }
-  //   });
-  //   Cubes.insert({
-  //     geometry: [1,1,1],
-  //     meshOptions: { color: 0xfc0000 }
-  //   });
-  // }
 });
+
+// from three.js editor.html
+
+function initEditor() {
+  window.URL = window.URL || window.webkitURL;
+  window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
+
+  Number.prototype.format = function (){
+    return this.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+  };
+
+  var editor = new Editor();
+
+  var viewport = new Viewport( editor );
+  document.body.appendChild( viewport.dom );
+
+  var player = new Player( editor );
+  document.body.appendChild( player.dom );
+
+  var script = new Script( editor );
+  document.body.appendChild( script.dom );
+
+  var toolbar = new Toolbar( editor );
+  document.body.appendChild( toolbar.dom );
+
+  var menubar = new Menubar( editor );
+  document.body.appendChild( menubar.dom );
+
+  var sidebar = new Sidebar( editor );
+  document.body.appendChild( sidebar.dom );
+
+  /*
+    var dialog = new UI.Dialog();
+    document.body.appendChild( dialog.dom );
+  */
+
+  //
+
+  editor.setTheme( editor.config.getKey( 'theme' ) );
+
+  editor.storage.init( function () {
+
+    editor.storage.get( function ( state ) {
+
+      if ( state !== undefined ) {
+
+	editor.fromJSON( state );
+
+      }
+
+      var selected = editor.config.getKey( 'selected' );
+
+      if ( selected !== undefined ) {
+
+	editor.selectByUuid( selected );
+
+      }
+
+    } );
+
+    //
+
+    var timeout;
+
+    var saveState = function ( scene ) {
+
+      if ( editor.config.getKey( 'autosave' ) === false ) {
+
+	return;
+
+      }
+
+      clearTimeout( timeout );
+
+      timeout = setTimeout( function () {
+
+	editor.signals.savingStarted.dispatch();
+
+	timeout = setTimeout( function () {
+
+	  editor.storage.set( editor.toJSON() );
+
+	  editor.signals.savingFinished.dispatch();
+
+	}, 100 );
+
+      }, 1000 );
+
+    };
+
+    var signals = editor.signals;
+
+    signals.editorCleared.add( saveState );
+    signals.geometryChanged.add( saveState );
+    signals.objectAdded.add( saveState );
+    signals.objectChanged.add( saveState );
+    signals.objectRemoved.add( saveState );
+    signals.materialChanged.add( saveState );
+    signals.sceneGraphChanged.add( saveState );
+    signals.scriptChanged.add( saveState );
+
+    /*
+      var showDialog = function ( content ) {
+
+      dialog.clear();
+
+      dialog.add( content );
+      dialog.showModal();
+
+      };
+
+      signals.showDialog.add( showDialog );
+    */
+
+  } );
+
+  //
+
+  document.addEventListener( 'dragover', function ( event ) {
+
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+
+  }, false );
+
+  document.addEventListener( 'drop', function ( event ) {
+
+    event.preventDefault();
+
+    if ( event.dataTransfer.files.length > 0 ) {
+
+      editor.loader.loadFile( event.dataTransfer.files[ 0 ] );
+
+    }
+
+  }, false );
+
+  document.addEventListener( 'keydown', function ( event ) {
+
+    switch ( event.keyCode ) {
+
+    case 8:
+      event.preventDefault(); // prevent browser back
+
+      var object = editor.selected;
+
+      if ( confirm( 'Delete ' + object.name + '?' ) === false ) return;
+
+      var parent = object.parent;
+      editor.removeObject( object );
+      editor.select( parent );
+
+      break;
+
+    }
+
+  }, false );
+
+  var onWindowResize = function ( event ) {
+
+    editor.signals.windowResize.dispatch();
+
+  };
+
+  window.addEventListener( 'resize', onWindowResize, false );
+
+  onWindowResize();
+
+  //
+
+  var file = null;
+  var hash = window.location.hash;
+
+  if ( hash.substr( 1, 4 ) === 'app=' ) file = hash.substr( 5 );
+  if ( hash.substr( 1, 6 ) === 'scene=' ) file = hash.substr( 7 );
+
+  if ( file !== null ) {
+
+    if ( confirm( 'Any unsaved data will be lost. Are you sure?' ) ) {
+
+      var loader = new THREE.XHRLoader();
+      loader.crossOrigin = '';
+      loader.load( file, function ( text ) {
+
+	var json = JSON.parse( text );
+
+	editor.clear();
+	editor.fromJSON( json );
+
+      } );
+
+    }
+
+  }
+
+  window.addEventListener( 'message', function ( event ) {
+
+    editor.clear();
+    editor.fromJSON( event.data );
+
+  }, false );
+
+}

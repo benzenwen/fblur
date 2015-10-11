@@ -49,7 +49,6 @@ var Storage = function () {
 		},
 
 		get: function ( callback ) {
-                    debugger;
 
 			var transaction = database.transaction( [ 'states' ], 'readwrite' );
 			var objectStore = transaction.objectStore( 'states' );
