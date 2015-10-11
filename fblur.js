@@ -62,6 +62,10 @@ Router.map(function () {
   });
 
   this.route('editor', {
+    path: '/editor'
+  });
+
+  this.route('landing', {
     path: '/'
   });
 });

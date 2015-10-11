@@ -1,0 +1,17 @@
+<template name="landing">
+  <video id="wrapper" autoplay loop wmode=transparent>
+    <source src="/sample.mp4" type="video/mp4">
+  </video>
+  <div class="content">
+    <div class="landing container">
+      <div class="header">
+        <h1>Faustian Blur</h1>
+        <h3>The three.js editor with multiuser collaboration.</h3>
+        {{#linkTo route="editor" class="btn btn-primary"}}Make Something{{/linkTo}}
+      </div>
+    </div>
+  </div>
+  <div class="credit">
+    <p><b>Demo video from <a href="http://carvisualizer.plus360degrees.com/threejs/" target="_none">Plus 360 Degrees</a></b></p>
+  </div>
+</template>
