@@ -1,3 +1,5 @@
-Meteor.publish('scenedb', function() {
-  return SceneDB.find();
+Meteor.publish('scenes', function() {
+  return Scenes.find();
 });
+
+

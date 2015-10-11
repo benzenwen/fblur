@@ -1,10 +1,39 @@
+Meteor.subscribe("scenes", function () { dataReady() });
+
 Template.Editor.created = function () {
     initEditor();
 };
 
-// from three.js editor.html
+
+var dataGood = 0;
+var initCalled = 0;
+
+// Poor man's join.
+function dataReady() {
+  dataGood = 1;
+  if (initCalled == 1) {
+    // go
+    initEditorReally();
+  }
+  return;
+};
 
 function initEditor() {
+  initCalled = 1;
+  if (dataGood == 1) {
+    // go
+    initEditorReally();
+  }
+  return;
+};
+    
+  
+
+// from three.js editor.html
+
+function initEditorReally() {
+
+  
   window.URL = window.URL || window.webkitURL;
   window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
 

@@ -1,94 +1,56 @@
 /**
- * @author mrdoob / http://mrdoob.com/
+ * @author benwen / http://benwen.com/
+ * Meteor.js version
  */
 
 var Storage = function () {
 
-	var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+  return {
 
-	if ( indexedDB === undefined  ) {
-		console.warn( 'Storage: IndexedDB not available.' );
-		return { init: function () {}, get: function () {}, set: function () {}, clear: function () {} };
-	}
+	init: function ( callback ) {
+      // nothing to init with Meteor
 
-	var name = 'threejs-editor';
-	var version = 1;
+      callback();
 
-	var database;
+	},
 
-	return {
+	get: function ( callback ) {
 
-		init: function ( callback ) {
+      var result = Scenes.findOne(); // TODO Fixme for more than one.
 
-			var request = indexedDB.open( name, version );
-			request.onupgradeneeded = function ( event ) {
+      if (result) {
+        console.log( '[' + /\d\d\:\d\d\:\d\d/.exec( new Date() )[ 0 ] + ']', 'Got state from minimongo. ' + result.data);
+	    callback( JSON.parse(result.data) );    
+      } else {
+        callback ();
+      }
+	},
 
-				var db = event.target.result;
+	set: function ( data, callback ) {
 
-				if ( db.objectStoreNames.contains( 'states' ) === false ) {
+	  var start = performance.now();
 
-					db.createObjectStore( 'states' );
+      var result = Scenes.upsert({"_id": "MASTER"}, {"data": JSON.stringify(data)});
 
-				}
+      if (result.numberAffected == 1) {
+		console.log( '[' + /\d\d\:\d\d\:\d\d/.exec( new Date() )[ 0 ] + ']', 'Saved state to minimongo. ' + ( Performance.now() - start ).toFixed( 2 ) + 'ms' );
+      } else {
+        console.log( '[' + /\d\d\:\d\d\:\d\d/.exec( new Date() )[ 0 ] + ']', 'Failes to save to minimongo. ' + ( performance.now() - start ).toFixed( 2 ) + 'ms' );
+	  }
+	},
 
-			};
-			request.onsuccess = function ( event ) {
+	clear: function ( callback ) {
 
-				database = event.target.result;
+      var result = Scenes.remove ({"_id": "MASTER"});
 
-				callback();
+      if (result == 1) {
+        console.log( 'Deleted MASTER' );
+       }
 
-			};
-			request.onerror = function ( event ) {
-
-				console.error( 'IndexedDB', event );
-
-			};
-
-
-		},
-
-		get: function ( callback ) {
-
-			var transaction = database.transaction( [ 'states' ], 'readwrite' );
-			var objectStore = transaction.objectStore( 'states' );
-			var request = objectStore.get( 0 );
-			request.onsuccess = function ( event ) {
-
-				callback( event.target.result );
-
-			};
-
-		},
-
-		set: function ( data, callback ) {
-
-			var start = performance.now();
-
-			var transaction = database.transaction( [ 'states' ], 'readwrite' );
-			var objectStore = transaction.objectStore( 'states' );
-			var request = objectStore.put( data, 0 );
-			request.onsuccess = function ( event ) {
-
-				console.log( '[' + /\d\d\:\d\d\:\d\d/.exec( new Date() )[ 0 ] + ']', 'Saved state to IndexedDB. ' + ( performance.now() - start ).toFixed( 2 ) + 'ms' );
-
-			};
-
-		},
-
-		clear: function ( callback ) {
-
-			var transaction = database.transaction( [ 'states' ], 'readwrite' );
-			var objectStore = transaction.objectStore( 'states' );
-			var request = objectStore.clear();
-			request.onsuccess = function ( event ) {
-
-				callback();
-
-			};
-
-		}
+	  callback();
 
 	}
+
+  }
 
 };
