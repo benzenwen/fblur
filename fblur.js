@@ -39,28 +39,28 @@ if (Meteor.isClient) {
   };
 
 
-  goCube = function () {
-      geometry = new THREE.BoxGeometry( 1, 1, 1 );
-      material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
-      cube = new THREE.Mesh( geometry, material );
-      scene.add( cube );
-  };
+  // goCube = function () {
+  //     geometry = new THREE.BoxGeometry( 1, 1, 1 );
+  //     material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+  //     cube = new THREE.Mesh( geometry, material );
+  //     scene.add( cube );
+  // };
 }
 
 // Add seed data
 Meteor.startup(function () {
-  if (Cubes.find().count() < 3) {
-    Cubes.insert({
-      geometry: [1,1,1],
-      meshOptions: { color: 0xffffff }
-    });
-    Cubes.insert({
-      geometry: [1,1,1],
-      meshOptions: { color: 0xcccccc }
-    });
-    Cubes.insert({
-      geometry: [1,1,1],
-      meshOptions: { color: 0xfc0000 }
-    });
-  }
+  // if (Cubes.find().count() < 3) {
+  //   Cubes.insert({
+  //     geometry: [1,1,1],
+  //     meshOptions: { color: 0xffffff }
+  //   });
+  //   Cubes.insert({
+  //     geometry: [1,1,1],
+  //     meshOptions: { color: 0xcccccc }
+  //   });
+  //   Cubes.insert({
+  //     geometry: [1,1,1],
+  //     meshOptions: { color: 0xfc0000 }
+  //   });
+  // }
 });
