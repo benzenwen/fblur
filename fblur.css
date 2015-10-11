@@ -1,5 +1,8 @@
 /* CSS declarations go here */
-body { margin: 0; }
+body {
+  margin: 0;
+}
+
 canvas {
   display: inherit;
   width: 100%; 
@@ -41,7 +44,20 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
   top: 0;
   left: 0;
   border: 0;
-  z-index: 1;
+  z-index: 2;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0;
+  padding: 0;
+  object-fit: cover;
+}
+
+img.background.image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 0;
+  z-index: 2;
   width: 100% !important;
   height: 100% !important;
   margin: 0;
@@ -54,7 +70,7 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
   top: 0;
   left: 0;
   border: 0;
-  z-index: 2;
+  z-index: 3;
   width: 100% !important;
   height: 100% !important;
   margin: 0;
@@ -83,5 +99,5 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
   bottom: 0px;
   padding-bottom: 12px;
   font-size: 10px;
-  z-index: 3;
+  z-index: 4;
 }
