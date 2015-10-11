@@ -66,7 +66,9 @@ var Storage = function () {
 			request.onsuccess = function ( event ) {
                 compositeResult.camera = event.target.result;
 				callback( compositeResult );
-
+			};
+			request.onerror = function ( event ) {
+				callback( compositeResult );
 			};
 
 		},
