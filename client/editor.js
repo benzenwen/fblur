@@ -69,14 +69,16 @@ function initEditorReally() {
   editor.setTheme( editor.config.getKey( 'theme' ) );
 
   editor.storage.init( function () {
-    Tracker.autorun( function () {
+    Tracker.autorun( function (c) {
       editor.storage.get( function ( state ) {
         if ( state !== undefined ) {
 	      editor.fromJSON( state );
         }
-        var selected = editor.config.getKey( 'selected' );
-        if ( selected !== undefined ) {
-	      editor.selectByUuid( selected );
+        if (c.firstRun) {
+          var selected = editor.config.getKey( 'selected' );
+          if ( selected !== undefined ) {
+	        editor.selectByUuid( selected );
+          }
         }
       })
     });
