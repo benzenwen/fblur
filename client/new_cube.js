@@ -49,6 +49,9 @@ Template.NewCube.created = function () {
 };
 
 Template.NewCube.rendered = function () {
+  var form = $('form#new-cube');
+
+  renderer.setSize(window.innerWidth, window.innerHeight - $(form).outerHeight());
 };
 
 Template.NewCube.destroyed = function () {
