@@ -1,4 +1,4 @@
-Template.NewCube.events({
+Template.NewCubeForm.events({
   'submit #new-cube': function (e, t) {
     e.preventDefault();
 
@@ -42,17 +42,17 @@ Template.NewCube.events({
   }
 });
 
-Template.NewCube.helpers({
+Template.NewCubeForm.helpers({
 });
 
-Template.NewCube.created = function () {
+Template.NewCubeForm.created = function () {
 };
 
-Template.NewCube.rendered = function () {
+Template.NewCubeForm.rendered = function () {
   var form = $('form#new-cube');
 
-  renderer.setSize(window.innerWidth, window.innerHeight - $(form).outerHeight());
+  // App.cubes.renderer.setSize(window.innerWidth, window.innerHeight - $(form).outerHeight());
 };
 
-Template.NewCube.destroyed = function () {
+Template.NewCubeForm.destroyed = function () {
 };
