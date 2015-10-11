@@ -451,16 +451,23 @@ Editor.prototype = {
 
 		// TODO: Clean this up somehow
 
-		var camera = loader.parse( json.camera );
+        if (json.camera) {
+		    var camera = loader.parse( json.camera );
 
-		this.camera.position.copy( camera.position );
-		this.camera.rotation.copy( camera.rotation );
-		this.camera.aspect = camera.aspect;
-		this.camera.near = camera.near;
-		this.camera.far = camera.far;
-
-		this.setScene( loader.parse( json.scene ) );
-		this.scripts = json.scripts;
+		    this.camera.position.copy( camera.position );
+		    this.camera.rotation.copy( camera.rotation );
+		    this.camera.aspect = camera.aspect;
+		    this.camera.near = camera.near;
+		    this.camera.far = camera.far;
+        }
+        
+        if (json.scene) {
+		    this.setScene( loader.parse( json.scene ) );
+        }
+        
+        if (json.scripts) {
+		    this.scripts = json.scripts;
+        }
 
 	},
 
